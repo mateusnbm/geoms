@@ -1,0 +1,2548 @@
+<!doctype html>
+<html>
+<head>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    <title>Mini tech - Chart maker</title>
+    
+	<!-- Bootstrap's CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous"><!-- Bootstrap's JS -->
+	<!-- Bootstrap's Icons -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+	<!-- Bootstrap's JS -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+	<!-- Jquery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+	<!-- ChartJS -->
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+	<!-- ChartJS Geo -->
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-geo@4.3.6/build/index.umd.min.js"></script>
+	
+    <style>
+	
+		.box {
+			border: 1px solid #d5d5d5;
+			border-radius: 8px;
+		}
+		
+		#btn-load {
+			min-width: 42px;
+			min-height: 38px;
+		}
+		#btn-plot {
+			min-width: 42px;
+			min-height: 38px;
+		}
+		
+		.loader {
+			width: 16px;
+			height: 16px;
+			border: 3px solid #f3f3f3;
+			border-top: 3px solid #3498db;
+			border-radius: 50%;
+			-webkit-animation: spin 0.8s linear infinite;
+			animation: spin 0.8s linear infinite;
+		}
+		@-webkit-keyframes spin {
+			to {
+				-webkit-transform: rotate(360deg);
+			}
+		}
+		@keyframes spin {
+			to {
+				transform: rotate(360deg);
+			}
+		}
+		
+		.box {
+			border-color: var(--bs-border-color);
+		}
+		#theme-toggle {
+			position: fixed;
+			bottom: 1rem;
+			right: 1rem;
+			z-index: 1030;
+		}
+		
+	</style>
+	
+</head>
+<body>
+	
+	<button type="button" class="btn btn-outline-secondary" id="theme-toggle">
+		<i class="bi bi-moon-stars-fill"></i>
+	</button>
+	
+	<div class="container mt-5">	
+		<div class="row justify-content-center">
+			<div class="col-lg-8 p-5 box">
+				<div class="row g-3 align-items-center">
+					<div class="col-auto">
+						Agregado:
+					</div>
+					<div class="col-auto">
+						<input type="text" id="input-agregado" class="form-control" placeholder="Código do agregado">
+					</div>
+					<div class="col-auto">
+						<button type="button" class="btn btn-primary" id="btn-load">
+							<i class="bi bi-lightning-charge-fill"></i>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="container" id="metadados-container">	
+		<div class="row justify-content-center">
+			<div class="col-lg-8 p-5">
+				<div class="row">
+					<div class="col">
+						<div id="metadados-content"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="container" id="chart-form-container">	
+		<div class="row justify-content-center">
+			<div class="col-lg-8 p-5 box">
+				<!-- CHART TYPE -->
+				<div class="row mb-2">
+					<label for="select-tipo" class="col-3 col-form-label">Tipo</label>
+					<div class="col">
+						<select class="form-select" id="select-tipo"></select>
+					</div>
+				</div>
+				<!-- CHART FORM CONTENT -->
+				<div id="chart-form-content"></div>
+				<!-- BTN PLOT -->
+				<div class="row mt-4">
+					<div class="col-9 offset-3">
+						<button type="button" class="btn btn-primary" id="btn-plot">
+							<i class="bi bi-bar-chart-line-fill"></i>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="container" id="chart-container">	
+		<div class="row justify-content-center">
+			<div class="col-lg-8 p-5">
+				<div class="row">
+					<div class="col">
+						<canvas id="chart"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="modal-toggles" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<!-- HEADER -->
+				<div class="modal-header">
+					<h1 class="modal-title fs-5"></h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<!-- BODY -->
+				<div class="modal-body">
+					<div id="itens"></div>
+				</div>
+				<!-- FOOTER-->
+				<div class="modal-footer">
+					<span class="me-auto text-danger" id="modal-toggles-span-error"></span>
+					<button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancelar</button>
+					<button type="button" class="btn btn-primary" id="modal-toggles-btn-save">Salvar</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+</body>
+</html>
+
+<script>
+	
+	var _chart = null;
+	var _metadados = null;
+	
+	var _geojsonUrl = {
+		1: "https://raw.githubusercontent.com/mateusnbm/geoms/refs/heads/main/brasil.topojson",
+		2: "https://raw.githubusercontent.com/mateusnbm/geoms/refs/heads/main/grande_regiao.topojson",
+		3: "https://raw.githubusercontent.com/mateusnbm/geoms/refs/heads/main/unidade_da_federacao.topojson"
+	};
+	
+	// ...
+	
+	function truncar(str, mlen) {
+	
+		return str.length > mlen ? str.slice(0, mlen) + "..." : str;
+	
+	}
+	
+	function combinacoes(arrays) {
+	
+		return arrays.reduce(
+			(resultado, atual) =>
+			resultado.flatMap(combinacao =>
+			atual.map(item => [...combinacao, item])
+			),
+			[[]]
+			);
+	}
+	
+	function agregarUnidades() {
+	
+		_metadados.NiveisTerritoriais.forEach(nivel => {
+		
+			if (nivel.Id == 1) {
+				
+				nivel.Unidades = [
+					{ Codigo:1, Nome: "Brasil" }
+				];
+				
+			} else if (nivel.Id == 2) {
+				
+				nivel.Unidades = [
+					{ Codigo:1, Nome: "Norte" },
+					{ Codigo:2, Nome: "Nordeste" },
+					{ Codigo:3, Nome: "Sudeste" },
+					{ Codigo:4, Nome: "Sul" },
+					{ Codigo:5, Nome: "Centro-Oeste" }
+				];
+				
+			} else if (nivel.Id == 3) {
+				
+				nivel.Unidades = [
+					{ Codigo:12, Nome: "Acre" },
+					{ Codigo:27, Nome: "Alagoas" },
+					{ Codigo:16, Nome: "Amapá" },
+					{ Codigo:13, Nome: "Amazonas" },
+					{ Codigo:29, Nome: "Bahia" },
+					{ Codigo:23, Nome: "Ceará" },
+					{ Codigo:53, Nome: "Distrito Federal" },
+					{ Codigo:32, Nome: "Espírito Santo" },
+					{ Codigo:52, Nome: "Goiás" },
+					{ Codigo:21, Nome: "Maranhão" },
+					{ Codigo:51, Nome: "Mato Grosso" },
+					{ Codigo:50, Nome: "Mato Grosso do Sul" },
+					{ Codigo:31, Nome: "Minas Gerais" },
+					{ Codigo:15, Nome: "Pará" },
+					{ Codigo:25, Nome: "Paraíba" },
+					{ Codigo:41, Nome: "Paraná" },
+					{ Codigo:26, Nome: "Pernambuco" },
+					{ Codigo:22, Nome: "Piauí" },
+					{ Codigo:33, Nome: "Rio de Janeiro" },
+					{ Codigo:24, Nome: "Rio Grande do Norte" },
+					{ Codigo:43, Nome: "Rio Grande do Sul" },
+					{ Codigo:11, Nome: "Rondônia" },
+					{ Codigo:14, Nome: "Roraima" },
+					{ Codigo:42, Nome: "Santa Catarina" },
+					{ Codigo:35, Nome: "São Paulo" },
+					{ Codigo:28, Nome: "Sergipe" },
+					{ Codigo:17, Nome: "Tocantins" }
+				];
+			
+			} else {
+			
+				nivel.Unidades = [];
+			
+			}
+		
+		});
+	
+	}
+	
+	// ...
+	
+	function lineChartPlot() {
+		
+		var pIndex = 1;
+		var nIndex = 3;
+		var cIndex = 4;
+		
+		var periodos = 
+			_metadados
+			.Periodos
+			.filter(x => x.Mostrar ?? true)
+			.map(x => x.Codigo);
+		
+		var variavel = $("#line-chart-form #select-eixo-y").val();
+		
+		var nivel = $("#line-chart-form #select-nivel").val();
+		
+		var unidades =
+			_metadados
+			.NiveisTerritoriais
+			.find(x => x.Id == nivel)
+			.Unidades
+			.filter(x => x.Mostrar ?? true)
+			.map(x => x.Codigo);
+		
+		// Constrói a url da api
+		
+		var url = `https://apisidra.ibge.gov.br/values`;
+		
+		// (_) Tabela
+		
+		url += `/t/${_metadados.Id}`;
+		
+		// (1) Períodos
+		
+		url += `/p/${periodos.join(",")}`;
+		
+		// (2) Variável
+		
+		url += `/v/${variavel}`;
+		
+		// (3) Nível territorial
+		
+		url += `/n${nivel}/${unidades.join(",")}`;
+		
+		// (4) Classificações: toda classificação precisa ter ao menos uma categoria selecionada 
+		
+		_metadados.Classificacoes.forEach((classificacao, index) => {
+		
+			var categorias = 
+				classificacao
+				.Categorias
+				.filter(x => x.Mostrar ?? true)
+				.map(x => x.Id)
+				.join(",");
+			
+			url += `/c${classificacao.Id}/${categorias}`;
+			
+		});
+		
+		// Dados formatados em JSON
+		
+		url += `?formato=json`;
+		
+		// Baixa os dados 
+		
+		$.ajax({
+			url: url,
+			method: "GET",
+			dataType: "json",
+			success: function (data) {
+				
+				// Faz o mapeamento das chaves (período, classificações, unidade) para os valores
+				
+				var map = {};
+				
+				data.slice(1).forEach((datapoint) => {
+					
+					var classificacoes = _metadados.Classificacoes.map((x, i) => datapoint[`D${cIndex + i}C`]);
+					
+					var key = "";
+					
+					key += datapoint[`D${pIndex}C`] + "-";
+					key += classificacoes.length ? classificacoes.join("-") + "-" : "";
+					key += datapoint[`D${nIndex}C`];
+					
+					map[key] = parseFloat(datapoint.V);
+				
+				});
+				
+				// Determina as séries
+				
+				var conjuntos = [];
+				
+				_metadados.Classificacoes.forEach((classificacao) => {
+				
+					conjuntos.push(
+						classificacao
+						.Categorias
+						.filter(x => x.Mostrar ?? true)
+						.map(x => { return {Id: x.Id, Nome: x.Nome}; })
+						);
+					
+				});
+				
+				conjuntos.push(
+					_metadados
+					.NiveisTerritoriais
+					.find(x => x.Id == nivel)
+					.Unidades
+					.filter(x => x.Mostrar ?? true)
+					.map(x => { return {Id: x.Codigo, Nome: x.Nome}; })
+					);
+					
+				var series = combinacoes(conjuntos);
+				
+				// Constrói os datasets
+				
+				var datasets = [];
+				
+				var labels = 
+					_metadados
+					.Periodos
+					.filter(x => x.Mostrar ?? true)
+					.map(x => { return {Id: x.Codigo, Nome: x.Nome}; });
+				
+				series.forEach((serie) => {
+					
+					var ids = serie.map(x => x.Id).join("-");
+					var input = $("#input-" + ids);
+					
+					datasets.push({
+						label: input.val(),
+						data: labels.map(x => map[x.Id + "-" + ids])
+					});
+					
+					console.log(ids);
+					
+				});
+				
+				console.log(labels);
+				console.log(map);
+				console.log(datasets);
+				
+				var titulo = $("#titulo").val();
+				var tituloX = $("#titulo-x").val();
+				var tituloY = $("#titulo-y").val();
+				
+				const config = {
+					type: "line",
+					data: {
+						labels: labels.map(x => x.Nome),
+						datasets: datasets
+					},
+					options: {
+						responsive: true,
+						plugins: {
+							legend: {
+								position: "top",
+							},
+							title: {
+								display: true,
+								text: titulo
+							}
+						},
+						scales: {
+							x: {
+								title: {
+									display: true,
+									text: tituloX
+								}
+							},
+							y: {
+								beginAtZero: true,
+								title: {
+									display: true,
+									text: tituloY
+								}
+							}
+						}
+					},
+				};
+				
+				mostrarChart(config);
+				
+			}
+		});
+	
+	}
+	
+	function lineChartFormX() {
+		
+		var periodos = 
+			_metadados
+			.Periodos
+			.filter(x => x.Mostrar ?? true)
+			.map(x => x.Nome);
+		
+		var html = `
+			<div class="row mb-2">
+				<label for="select-eixo-x" class="col-3 col-form-label">Eixo X</label>
+				<div class="col">
+					<div class="row mb-2">
+						<div class="col">
+							<select class="form-select" id="select-eixo-x">
+								<option value="p" selected>${_metadados.TipoPeriodo}</option>
+							</select>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col fst-italic text-end" style="font-size: 0.75rem;">
+							<span id="subtexto-eixo-x">
+								${truncar(periodos.join(", "), 35)}
+							</span>
+							<button 
+							type="button" 
+							class="btn btn-link btn-toggles fst-italic p-0" 
+							data-param="p"
+							style="font-size: 0.75rem;"
+							>[gerenciar]</button>
+						</div>
+					</div>
+				</div>
+			</div>`;
+		
+		return html;
+		
+	}
+	
+	function lineChartFormY() {
+		
+		var itens = _metadados.Variaveis.map((variavel, index) => {
+			
+			return `
+				<option value="${variavel.Id}" ${index == 0 ? "selected" : ""}>
+					${variavel.Nome}
+				</option>`;
+				
+		});
+		
+		var html = `
+			<div class="row mb-2">
+				<label for="select-eixo-y" class="col-3 col-form-label">Eixo Y</label>
+				<div class="col">
+					<select class="form-select" id="select-eixo-y">
+						<option value="" disabled selected hidden></option>
+						${itens.join("")}
+					</select>
+				</div>
+			</div>`;
+		
+		return html;
+		
+	}
+	
+	function lineChartFormDesagregacoes() {
+		
+		var desagregacoes = "";
+		
+		_metadados.Classificacoes.forEach((classificacao) => {
+			
+			var categorias = 
+				classificacao
+				.Categorias
+				.filter(x => x.Mostrar ?? true)
+				.map(x => x.Nome);
+			
+			desagregacoes += `
+				<div class="row mb-2">
+					<div class="col">
+						<div class="row">
+							<div class="col">
+								<input 
+								type="text" 
+								class="form-control" 
+								value="Variável - ${classificacao.Nome}" 
+								disabled>
+							</div>
+						</div>
+						<div class="row mt-2">
+							<div class="col fst-italic text-end" style="font-size: 0.75rem;">
+								<span id="subtexto-c-${classificacao.Id}">
+									${truncar(categorias.join(", "), 35)}
+								</span>
+								<button 
+								type="button" 
+								class="btn btn-link btn-toggles fst-italic p-0" 
+								data-param="c"
+								data-param-id="${classificacao.Id}"
+								style="font-size: 0.75rem;"
+								>[gerenciar]</button>
+							</div>
+						</div>
+					</div>
+				</div>`;
+				
+		});
+		
+		var niveis = 
+			_metadados
+			.NiveisTerritoriais
+			.map(x => `<option value="${x.Id}">Nível territorial - ${x.Nome}</option>`);
+		
+		var unidades = 
+			_metadados
+			.NiveisTerritoriais[0]
+			.Unidades
+			.filter(x => x.Mostrar ?? true)
+			.map(x => x.Nome);
+		
+		desagregacoes += `
+			<div class="row mb-2">
+				<div class="col">
+					<div class="row">
+						<div class="col">
+							<select class="form-select" id="select-nivel">
+								${niveis}
+							</select>
+						</div>
+					</div>
+					<div class="row mt-2">
+						<div class="col fst-italic text-end" style="font-size: 0.75rem;">
+							<span id="subtexto-nivel-territorial">
+								${truncar(unidades.join(", "), 35)}
+							</span>
+							<button 
+							type="button" 
+							class="btn btn-link btn-toggles fst-italic p-0" 
+							data-param="n"
+							style="font-size: 0.75rem;"
+							>[gerenciar]</button>
+						</div>
+					</div>
+				</div>
+			</div>`;
+		
+		var html = `
+			<div class="row">
+				<label class="col-3 col-form-label">Desagregações</label>
+				<div class="col">
+					${desagregacoes}
+				</div>
+			</div>`;
+		
+		return html;
+	
+	}
+	
+	function lineChartFormTitulos() {
+		
+		// Determina as séries
+		
+		var conjuntos = [];
+		
+		var select = $("#line-chart-form #select-nivel");
+		var padrao = _metadados.NiveisTerritoriais[0].Id;
+		var nivel = (select.length ? select.val() : padrao);
+		
+		_metadados.Classificacoes.forEach((classificacao) => {
+				
+			conjuntos.push(
+				classificacao
+				.Categorias
+				.filter(x => x.Mostrar ?? true)
+				.map(x => { return {Id: x.Id, Nome: x.Nome}; })
+				);
+		
+		});
+		
+		conjuntos.push(
+			_metadados
+			.NiveisTerritoriais
+			.find(x => x.Id == nivel)
+			.Unidades
+			.filter(x => x.Mostrar ?? true)
+			.map(x => { return {Id: x.Codigo, Nome: x.Nome}; })
+		);
+		
+		var series = combinacoes(conjuntos);
+		
+		// Gera o html com um input para cada série 
+		
+		var inputsHtml = "";
+		
+		series.forEach((serie) => {
+			
+			var id = serie.map(x => x.Id).join("-");
+			var titulo = serie.map(x => x.Nome).join(", ");
+			
+			inputsHtml += `
+				<div class="row mb-2">
+					<div class="col">
+						<div class="row">
+							<div class="col">
+								<input 
+								type="text" 
+								class="form-control" 
+								value="${titulo}"
+								id="input-${id}">
+							</div>
+						</div>
+						<div class="row mt-2">
+							<div class="col fst-italic text-end" style="font-size: 0.75rem;">
+								<span>${titulo}</span>
+							</div>
+						</div>
+					</div>
+				</div>`;
+			
+		});
+		
+		// Constrói o html com todos os inputs
+		
+		var selectEixoY = $("#line-chart-form #select-eixo-y");
+		var tituloEixoY = 
+			selectEixoY.length ? 
+			_metadados.Variaveis.find(x => x.Id == selectEixoY.val()).Nome : 
+			_metadados.Variaveis[0].Nome;
+		
+		var html = `
+			<!-- TÍTULO DO GRÁFICO -->
+			<div class="row mb-2">
+				<label for="titulo" class="col-3 col-form-label">Título</label>
+				<div class="col">
+					<input type="text" class="form-control" id="titulo" value="${_metadados.Nome}">
+				</div>
+			</div>
+			<!-- TÍTULO DO EIXO X -->
+			<div class="row mb-2">
+				<label for="titulo-x" class="col-3 col-form-label">Título X</label>
+				<div class="col">
+					<input type="text" class="form-control" id="titulo-x" value="${_metadados.TipoPeriodo}">
+				</div>
+			</div>
+			<!-- TÍTULO DO EIXO Y -->
+			<div class="row mb-2">
+				<label for="titulo-y" class="col-3 col-form-label">Título Y</label>
+				<div class="col">
+					<input 
+					type="text" 
+					class="form-control" 
+					id="titulo-y" 
+					value="${tituloEixoY}">
+				</div>
+			</div>
+			<!-- TÍTULOS DAS SÉRIES -->
+			<div class="row">
+				<label class="col-3 col-form-label">Séries</label>
+				<div class="col">
+					${inputsHtml}
+				</div>
+			</div>
+		`;
+		
+		return html;
+	
+	}
+	
+	function lineChartFormEventSelectEixoY() {
+	
+		$(document).on("change", "#line-chart-form #select-eixo-y", function() {
+			
+			var variavel = 
+				_metadados
+				.Variaveis
+				.find(x => x.Id == $(this).val());
+			
+			$("#line-chart-form #titulo-y").val(variavel.Nome);
+			
+		});
+	
+	}
+	
+	function lineChartFormEventSelectNivel() {
+		
+		$(document).on("change", "#line-chart-form #select-nivel", function() {
+			
+			var nivel = 
+				_metadados
+				.NiveisTerritoriais
+				.find(x => x.Id == $(this).val());
+			
+			var unidades = 
+				nivel
+				.Unidades
+				.filter(x => x.Mostrar ?? true)
+				.map(x => x.Nome);
+			
+			var subtexto = truncar(unidades.join(", "), 35);
+			
+			$("#line-chart-form #subtexto-nivel-territorial").html(subtexto);
+			
+			$("#line-chart-form #titulos").html(lineChartFormTitulos());
+			
+		});
+		
+	}
+	
+	function lineChartFormEventBtnToggles() {
+		
+		$(document).on("click", "#line-chart-form .btn-toggles", function() {
+			
+			var param = $(this).data("param");
+			var paramId = $(this).data("param-id");
+			
+			var titulo = "";
+			var linhas = "";
+			
+			if (param == "p") {
+				
+				// Períodos 
+				
+				titulo = "Períodos";
+				
+				_metadados.Periodos.forEach((periodo) => {
+					
+					linhas += `
+						<tr>
+							<td>${periodo.Codigo}</td>
+							<td>${periodo.Nome}</td>
+							<td>
+								<input 
+								class="form-check-input" 
+								type="checkbox" 
+								data-id="${periodo.Codigo}"
+								${periodo.Mostrar ?? true ? "checked" : ""}>
+							</td>
+						</tr>`;
+						
+					periodo.TmpMostrar = periodo.Mostrar;
+					
+				});
+				
+			} else if (param == "c") {
+			
+				// Categorias de uma classificação
+				
+				const classificacao = 
+					_metadados
+					.Classificacoes
+					.find(x => x.Id == paramId);
+				
+				titulo = classificacao.Nome;
+				
+				classificacao.Categorias.forEach((categoria) => {
+				
+					linhas += `
+						<tr>
+							<td>${categoria.Id}</td>
+							<td>${categoria.Nome}</td>
+							<td>
+								<input 
+								class="form-check-input" 
+								type="checkbox" 
+								data-id="${categoria.Id}"
+								${categoria.Mostrar ?? true ? "checked" : ""}>
+							</td>
+						</tr>`;
+						
+					categoria.TmpMostrar = categoria.Mostrar;
+				
+				});
+				
+			} else if (param == "n") {
+				
+				// Unidades de um nível territorial
+				
+				const nivel = 
+					_metadados
+					.NiveisTerritoriais
+					.find(x => x.Id == $("#line-chart-form #select-nivel").val());
+				
+				paramId = nivel.Id;
+				
+				titulo = nivel.Nome;
+				
+				nivel.Unidades.forEach((unidade) => {
+				
+					linhas += `
+						<tr>
+							<td>${unidade.Codigo}</td>
+							<td>${unidade.Nome}</td>
+							<td>
+								<input 
+								class="form-check-input" 
+								type="checkbox" 
+								data-id="${unidade.Codigo}"
+								${unidade.Mostrar ?? true ? "checked" : ""}>
+							</td>
+						</tr>`;
+					
+					unidade.TmpMostrar = unidade.Mostrar;
+					
+				});
+			
+			}
+			
+			var html = `
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th scope="col">Código</th>
+							<th scope="col">Nome</th>
+							<th scope="col">
+								<div class="d-flex align-items-center gap-1">
+									<span>Mostrar</span>
+									&nbsp;
+									<button type="button" class="btn p-0 lh-1" id="btn-all">
+										<i class="bi bi-check-square"></i>
+									</button>
+									&nbsp;
+									<button type="button" class="btn p-0 lh-1" id="btn-none">
+										<i class="bi bi-x-square"></i>
+									</button>
+								</div>
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						${linhas}
+					</tbody>
+				</table>`;
+			
+			$("#modal-toggles").data("form", "line-chart-form");
+			$("#modal-toggles").data("param", param);
+			$("#modal-toggles").data("param-id", paramId);
+			
+			$("#modal-toggles .modal-title").html(titulo);
+			$("#modal-toggles .modal-body").html(html);
+			
+			$("#modal-toggles").modal("show");
+		
+		});
+		
+	}
+	
+	function lineChartFormEventModalToggles() {
+		
+		$("#modal-toggles").on("hide.bs.modal", function() {
+			
+			$("#line-chart-form #titulos").html(lineChartFormTitulos());
+		
+		});
+		
+	}
+	
+	function lineChartForm() {
+		
+		var eixoX = lineChartFormX();
+		var eixoY = lineChartFormY();
+		var desagregacoes = lineChartFormDesagregacoes();
+		var titulos = lineChartFormTitulos();
+		
+		var html = `
+			<div id="line-chart-form">
+				${eixoX}
+				${eixoY}
+				${desagregacoes}
+				<div id="titulos">
+					${titulos}
+				</div>
+			</div>
+		`;
+		
+		$("#chart-form-content").html(html);
+		
+		lineChartFormEventSelectEixoY();
+		lineChartFormEventSelectNivel();
+		lineChartFormEventBtnToggles();
+		lineChartFormEventModalToggles();
+		
+	}
+	
+	// ...
+	
+	function barChartPlot() {
+		
+		var pIndex = 1;
+		var nIndex = 3;
+		var cIndex = 4;
+		
+		var periodos = 
+			_metadados
+			.Periodos
+			.filter(x => x.Mostrar ?? true)
+			.map(x => x.Codigo);
+		
+		var variavel = $("#bar-chart-form #select-eixo-y").val();
+		
+		var nivel = $("#bar-chart-form #select-nivel").val();
+		
+		var unidades =
+			_metadados
+			.NiveisTerritoriais
+			.find(x => x.Id == nivel)
+			.Unidades
+			.filter(x => x.Mostrar ?? true)
+			.map(x => x.Codigo);
+		
+		// Constrói a url da api
+		
+		var url = `https://apisidra.ibge.gov.br/values`;
+		
+		// (_) Tabela
+		
+		url += `/t/${_metadados.Id}`;
+		
+		// (1) Períodos
+		
+		url += `/p/${periodos.join(",")}`;
+		
+		// (2) Variável
+		
+		url += `/v/${variavel}`;
+		
+		// (3) Nível territorial
+		
+		url += `/n${nivel}/${unidades.join(",")}`;
+		
+		// (4) Classificações: toda classificação precisa ter ao menos uma categoria selecionada 
+		
+		_metadados.Classificacoes.forEach((classificacao) => {
+		
+			var categorias = 
+				classificacao
+				.Categorias
+				.filter(x => x.Mostrar ?? true)
+				.map(x => x.Id)
+				.join(",");
+			
+			url += `/c${classificacao.Id}/${categorias}`;
+			
+		});
+		
+		// Dados formatados em JSON
+		
+		url += `?formato=json`;
+		
+		// ...
+		
+		// ...
+		
+		// Baixa os dados 
+		
+		$.ajax({
+			url: url,
+			method: "GET",
+			dataType: "json",
+			success: function (data) {
+				
+				// Faz o mapeamento das chaves (período, classificações, unidade) para os valores
+				
+				var map = {};
+				
+				data.slice(1).forEach((datapoint) => {
+					
+					var classificacoes = _metadados.Classificacoes.map((x, i) => datapoint[`D${cIndex + i}C`]);
+					
+					var key = "";
+					
+					key += datapoint[`D${pIndex}C`] + "-";
+					key += classificacoes.length ? classificacoes.join("-") + "-" : "";
+					key += datapoint[`D${nIndex}C`];
+					
+					map[key] = datapoint.V;
+				
+				});
+				
+				// Determina as séries
+				
+				var conjuntos = [];
+				
+				_metadados.Classificacoes.forEach((classificacao) => {
+				
+					conjuntos.push(
+						classificacao
+						.Categorias
+						.filter(x => x.Mostrar ?? true)
+						.map(x => { return {Id: x.Id, Nome: x.Nome}; })
+						);
+					
+				});
+				
+				conjuntos.push(
+					_metadados
+					.NiveisTerritoriais
+					.find(x => x.Id == nivel)
+					.Unidades
+					.filter(x => x.Mostrar ?? true)
+					.map(x => { return {Id: x.Codigo, Nome: x.Nome}; })
+					);
+					
+				var series = combinacoes(conjuntos);
+				
+				// Constrói os datasets
+				
+				var datasets = [];
+				
+				var labels = 
+					_metadados
+					.Periodos
+					.filter(x => x.Mostrar ?? true)
+					.map(x => { return {Id: x.Codigo, Nome: x.Nome}; });
+				
+				series.forEach((serie) => {
+					
+					var ids = serie.map(x => x.Id).join("-");
+					var input = $("#input-" + ids);
+					
+					datasets.push({
+						label: input.val(),
+						data: labels.map(x => map[x.Id + "-" + ids])
+					});
+					
+				});
+				
+				var estilo = $("#bar-chart-form #select-estilo").val();
+				var empilhar = (estilo == "empilhadas");
+				
+				var titulo = $("#titulo").val();
+				var tituloX = $("#titulo-x").val();
+				var tituloY = $("#titulo-y").val();
+				
+				const config = {
+					type: "bar",
+					data: {
+						labels: labels.map(x => x.Nome),
+						datasets: datasets
+					},
+					options: {
+						responsive: true,
+						plugins: {
+							legend: {
+								position: "top",
+							},
+							title: {
+								display: true,
+								text: titulo
+							}
+						},
+						scales: {
+							x: {
+								title: {
+									display: true,
+									text: tituloX
+								},
+								stacked: empilhar
+							},
+							y: {
+								beginAtZero: true,
+								title: {
+									display: true,
+									text: tituloY
+								},
+								stacked: empilhar
+							}
+						}
+					},
+				};
+				
+				mostrarChart(config);
+				
+			}
+		});
+		
+	}
+	
+	function barChartEstilo() {
+		
+		var html = `
+			<div class="row mb-2">
+				<label for="select-estilo" class="col-3 col-form-label">Estilo</label>
+				<div class="col">
+					<select class="form-select" id="select-estilo">
+						<option value="simples" selected}>Barras simples</option>
+						<option value="empilhadas" selected}>Barras empilhadas</option>
+					</select>
+				</div>
+			</div>`;
+		
+		return html;
+	
+	}
+	
+	function barChartFormX() {
+		
+		var periodos = 
+			_metadados
+			.Periodos
+			.filter(x => x.Mostrar ?? true)
+			.map(x => x.Nome);
+		
+		var html = `
+			<div class="row mb-2">
+				<label for="select-eixo-x" class="col-3 col-form-label">Eixo X</label>
+				<div class="col">
+					<div class="row mb-2">
+						<div class="col">
+							<select class="form-select" id="select-eixo-x">
+								<option value="p" selected>${_metadados.TipoPeriodo}</option>
+							</select>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col fst-italic text-end" style="font-size: 0.75rem;">
+							<span id="subtexto-eixo-x">
+								${truncar(periodos.join(", "), 35)}
+							</span>
+							<button 
+							type="button" 
+							class="btn btn-link btn-toggles fst-italic p-0" 
+							data-param="p"
+							style="font-size: 0.75rem;"
+							>[gerenciar]</button>
+						</div>
+					</div>
+				</div>
+			</div>`;
+		
+		return html;
+		
+	}
+	
+	function barChartFormY() {
+		
+		var itens = _metadados.Variaveis.map((variavel, index) => {
+			
+			return `
+				<option value="${variavel.Id}" ${index == 0 ? "selected" : ""}>
+					${variavel.Nome}
+				</option>`;
+				
+		});
+		
+		var html = `
+			<div class="row mb-2">
+				<label for="select-eixo-y" class="col-3 col-form-label">Eixo Y</label>
+				<div class="col">
+					<select class="form-select" id="select-eixo-y">
+						<option value="" disabled selected hidden></option>
+						${itens.join("")}
+					</select>
+				</div>
+			</div>`;
+		
+		return html;
+		
+	}
+	
+	function barChartFormDesagregacoes() {
+		
+		var desagregacoes = "";
+		
+		_metadados.Classificacoes.forEach((classificacao) => {
+			
+			var categorias = 
+				classificacao
+				.Categorias
+				.filter(x => x.Mostrar ?? true)
+				.map(x => x.Nome);
+			
+			desagregacoes += `
+				<div class="row mb-2">
+					<div class="col">
+						<div class="row">
+							<div class="col">
+								<input 
+								type="text" 
+								class="form-control" 
+								value="Variável - ${classificacao.Nome}" 
+								disabled>
+							</div>
+						</div>
+						<div class="row mt-2">
+							<div class="col fst-italic text-end" style="font-size: 0.75rem;">
+								<span id="subtexto-c-${classificacao.Id}">
+									${truncar(categorias.join(", "), 35)}
+								</span>
+								<button 
+								type="button" 
+								class="btn btn-link btn-toggles fst-italic p-0" 
+								data-param="c"
+								data-param-id="${classificacao.Id}"
+								style="font-size: 0.75rem;"
+								>[gerenciar]</button>
+							</div>
+						</div>
+					</div>
+				</div>`;
+				
+		});
+		
+		var niveis = 
+			_metadados
+			.NiveisTerritoriais
+			.map(x => `<option value="${x.Id}">Nível territorial - ${x.Nome}</option>`);
+		
+		var unidades = 
+			_metadados
+			.NiveisTerritoriais[0]
+			.Unidades
+			.filter(x => x.Mostrar ?? true)
+			.map(x => x.Nome);
+		
+		desagregacoes += `
+			<div class="row mb-2">
+				<div class="col">
+					<div class="row">
+						<div class="col">
+							<select class="form-select" id="select-nivel">
+								${niveis}
+							</select>
+						</div>
+					</div>
+					<div class="row mt-2">
+						<div class="col fst-italic text-end" style="font-size: 0.75rem;">
+							<span id="subtexto-nivel-territorial">
+								${truncar(unidades.join(", "), 35)}
+							</span>
+							<button 
+							type="button" 
+							class="btn btn-link btn-toggles fst-italic p-0" 
+							data-param="n"
+							style="font-size: 0.75rem;"
+							>[gerenciar]</button>
+						</div>
+					</div>
+				</div>
+			</div>`;
+		
+		var html = `
+			<div class="row">
+				<label class="col-3 col-form-label">Desagregações</label>
+				<div class="col">
+					${desagregacoes}
+				</div>
+			</div>`;
+		
+		return html;
+	
+	}
+	
+	function barChartFormTitulos() {
+		
+		// Determina as séries
+		
+		var conjuntos = [];
+		
+		var select = $("#bar-chart-form #select-nivel");
+		var padrao = _metadados.NiveisTerritoriais[0].Id;
+		var nivel = (select.length ? select.val() : padrao);
+		
+		_metadados.Classificacoes.forEach((classificacao) => {
+				
+			conjuntos.push(
+				classificacao
+				.Categorias
+				.filter(x => x.Mostrar ?? true)
+				.map(x => { return {Id: x.Id, Nome: x.Nome}; })
+				);
+		
+		});
+		
+		conjuntos.push(
+			_metadados
+			.NiveisTerritoriais
+			.find(x => x.Id == nivel)
+			.Unidades
+			.filter(x => x.Mostrar ?? true)
+			.map(x => { return {Id: x.Codigo, Nome: x.Nome}; })
+		);
+		
+		var series = combinacoes(conjuntos);
+		
+		// Gera o html com um input para cada série 
+		
+		var inputsHtml = "";
+		
+		series.forEach((serie) => {
+			
+			var id = serie.map(x => x.Id).join("-");
+			var titulo = serie.map(x => x.Nome).join(", ");
+			
+			inputsHtml += `
+				<div class="row mb-2">
+					<div class="col">
+						<div class="row">
+							<div class="col">
+								<input 
+								type="text" 
+								class="form-control" 
+								value="${titulo}"
+								id="input-${id}">
+							</div>
+						</div>
+						<div class="row mt-2">
+							<div class="col fst-italic text-end" style="font-size: 0.75rem;">
+								<span>${titulo}</span>
+							</div>
+						</div>
+					</div>
+				</div>`;
+			
+		});
+		
+		// Constrói o html com todos os inputs
+		
+		var selectEixoY = $("#bar-chart-form #select-eixo-y");
+		var tituloEixoY = 
+			selectEixoY.length ? 
+			_metadados.Variaveis.find(x => x.Id == selectEixoY.val()).Nome : 
+			_metadados.Variaveis[0].Nome;
+		
+		var html = `
+			<!-- TÍTULO DO GRÁFICO -->
+			<div class="row mb-2">
+				<label for="titulo" class="col-3 col-form-label">Título</label>
+				<div class="col">
+					<input type="text" class="form-control" id="titulo" value="${_metadados.Nome}">
+				</div>
+			</div>
+			<!-- TÍTULO DO EIXO X -->
+			<div class="row mb-2">
+				<label for="titulo-x" class="col-3 col-form-label">Título X</label>
+				<div class="col">
+					<input type="text" class="form-control" id="titulo-x" value="${_metadados.TipoPeriodo}">
+				</div>
+			</div>
+			<!-- TÍTULO DO EIXO Y -->
+			<div class="row mb-2">
+				<label for="titulo-y" class="col-3 col-form-label">Título Y</label>
+				<div class="col">
+					<input 
+					type="text" 
+					class="form-control" 
+					id="titulo-y" 
+					value="${tituloEixoY}">
+				</div>
+			</div>
+			<!-- TÍTULOS DAS SÉRIES -->
+			<div class="row">
+				<label class="col-3 col-form-label">Séries</label>
+				<div class="col">
+					${inputsHtml}
+				</div>
+			</div>
+		`;
+		
+		return html;
+	
+	}
+	
+	function barChartFormEventSelectEixoY() {
+	
+		$(document).on("change", "#bar-chart-form #select-eixo-y", function() {
+			
+			var variavel = 
+				_metadados
+				.Variaveis
+				.find(x => x.Id == $(this).val());
+			
+			$("#bar-chart-form #titulo-y").val(variavel.Nome);
+			
+		});
+	
+	}
+	
+	function barChartFormEventSelectNivel() {
+		
+		$(document).on("change", "#bar-chart-form #select-nivel", function() {
+			
+			var nivel = 
+				_metadados
+				.NiveisTerritoriais
+				.find(x => x.Id == $(this).val());
+			
+			var unidades = 
+				nivel
+				.Unidades
+				.filter(x => x.Mostrar ?? true)
+				.map(x => x.Nome);
+			
+			var subtexto = truncar(unidades.join(", "), 35);
+			
+			$("#bar-chart-form #subtexto-nivel-territorial").html(subtexto);
+			
+			$("#bar-chart-form #titulos").html(barChartFormTitulos());
+			
+		});
+		
+	}
+	
+	function barChartFormEventBtnToggles() {
+		
+		$(document).on("click", "#bar-chart-form .btn-toggles", function() {
+			
+			var param = $(this).data("param");
+			var paramId = $(this).data("param-id");
+			
+			var titulo = "";
+			var linhas = "";
+			
+			if (param == "p") {
+				
+				// Períodos 
+				
+				titulo = "Períodos";
+				
+				_metadados.Periodos.forEach((periodo) => {
+					
+					linhas += `
+						<tr>
+							<td>${periodo.Codigo}</td>
+							<td>${periodo.Nome}</td>
+							<td>
+								<input 
+								class="form-check-input" 
+								type="checkbox" 
+								data-id="${periodo.Codigo}"
+								${periodo.Mostrar ?? true ? "checked" : ""}>
+							</td>
+						</tr>`;
+						
+					periodo.TmpMostrar = periodo.Mostrar;
+					
+				});
+				
+			} else if (param == "c") {
+			
+				// Categorias de uma classificação
+				
+				const classificacao = 
+					_metadados
+					.Classificacoes
+					.find(x => x.Id == paramId);
+				
+				titulo = classificacao.Nome;
+				
+				classificacao.Categorias.forEach((categoria) => {
+				
+					linhas += `
+						<tr>
+							<td>${categoria.Id}</td>
+							<td>${categoria.Nome}</td>
+							<td>
+								<input 
+								class="form-check-input" 
+								type="checkbox" 
+								data-id="${categoria.Id}"
+								${categoria.Mostrar ?? true ? "checked" : ""}>
+							</td>
+						</tr>`;
+						
+					categoria.TmpMostrar = categoria.Mostrar;
+				
+				});
+				
+			} else if (param == "n") {
+				
+				// Unidades de um nível territorial
+				
+				const nivel = 
+					_metadados
+					.NiveisTerritoriais
+					.find(x => x.Id == $("#bar-chart-form #select-nivel").val());
+				
+				paramId = nivel.Id;
+				
+				titulo = nivel.Nome;
+				
+				nivel.Unidades.forEach((unidade) => {
+				
+					linhas += `
+						<tr>
+							<td>${unidade.Codigo}</td>
+							<td>${unidade.Nome}</td>
+							<td>
+								<input 
+								class="form-check-input" 
+								type="checkbox" 
+								data-id="${unidade.Codigo}"
+								${unidade.Mostrar ?? true ? "checked" : ""}>
+							</td>
+						</tr>`;
+					
+					unidade.TmpMostrar = unidade.Mostrar;
+					
+				});
+			
+			}
+			
+			var html = `
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th scope="col">Código</th>
+							<th scope="col">Nome</th>
+							<th scope="col">
+								<div class="d-flex align-items-center gap-1">
+									<span>Mostrar</span>
+									&nbsp;
+									<button type="button" class="btn p-0 lh-1" id="btn-all">
+										<i class="bi bi-check-square"></i>
+									</button>
+									&nbsp;
+									<button type="button" class="btn p-0 lh-1" id="btn-none">
+										<i class="bi bi-x-square"></i>
+									</button>
+								</div>
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						${linhas}
+					</tbody>
+				</table>`;
+			
+			$("#modal-toggles").data("form", "bar-chart-form");
+			$("#modal-toggles").data("param", param);
+			$("#modal-toggles").data("param-id", paramId);
+			
+			$("#modal-toggles .modal-title").html(titulo);
+			$("#modal-toggles .modal-body").html(html);
+			
+			$("#modal-toggles").modal("show");
+		
+		});
+		
+	}
+	
+	function barChartFormEventModalToggles() {
+		
+		$("#modal-toggles").on("hide.bs.modal", function() {
+			
+			$("#bar-chart-form #titulos").html(barChartFormTitulos());
+		
+		});
+		
+	}
+	
+	function barChartForm() {
+		
+		var estilo = barChartEstilo();
+		var eixoX = barChartFormX();
+		var eixoY = barChartFormY();
+		var desagregacoes = barChartFormDesagregacoes();
+		var titulos = barChartFormTitulos();
+		
+		var html = `
+			<div id="bar-chart-form">
+				${estilo}
+				${eixoX}
+				${eixoY}
+				${desagregacoes}
+				<div id="titulos">
+					${titulos}
+				</div>
+			</div>
+		`;
+		
+		$("#chart-form-content").html(html);
+		
+		barChartFormEventSelectEixoY();
+		barChartFormEventSelectNivel();
+		barChartFormEventBtnToggles();
+		barChartFormEventModalToggles();
+		
+	}
+	
+	// ...
+	
+	function choroplethChartPlot() {
+		
+		var plotBtn = $("#btn-plot");
+		var plotBtnHtml = plotBtn.html();
+		
+		var nivel 	 = $("#choropleth-chart-form #select-nivel").val();
+		var periodo  = $("#choropleth-chart-form #select-periodo").val();
+		var variavel = $("#choropleth-chart-form #select-variavel").val();
+		
+		// Constrói a url da api
+		
+		var url = `https://apisidra.ibge.gov.br/values`;
+		
+		// (_) Tabela
+		
+		url += `/t/${_metadados.Id}`;
+		
+		// (1) Períodos
+		
+		url += `/p/${periodo}`;
+		
+		// (2) Variável
+		
+		url += `/v/${variavel}`;
+		
+		// (3) Nível territorial
+		
+		url += `/n${nivel}/all`;
+		
+		// (4) Classificações: toda classificação precisa ter ao menos uma categoria selecionada 
+		
+		_metadados.Classificacoes.forEach((classificacao) => {
+			
+			var categoria = $(`#choropleth-chart-form #select-cla-${classificacao.Id}`).val();
+			
+			url += `/c${classificacao.Id}/${categoria}`;
+			
+		});
+		
+		// Dados formatados em JSON
+		
+		url += `?formato=json`;
+		
+		// Baixa os dados, geometria do brasil (contorno) e as geometrias das unidades selecionadas
+		
+		const urls = [
+			url, 
+			_geojsonUrl[1], 
+			_geojsonUrl[nivel]
+		];
+		
+		plotBtn.html(`<div class="loader"></div>`);
+		plotBtn.prop("disabled", true).addClass("disabled");
+		
+		Promise
+		.all(urls.map(url => fetch(url).then(response => response.json())))
+		.then(([dados, brasil, geometrias]) => {
+			
+			// Faz o mapeamento dos valores para as unidades territoriais
+			
+			var map = {};
+			
+			dados.slice(1).forEach((datapoint) => {
+				
+				map[datapoint["D3C"]] = {
+					Id: datapoint["D3C"],
+					Nome: datapoint["D3N"],
+					Valor: parseFloat(datapoint.V)
+				};
+				
+			});
+			
+			// Formata os dados conforme esperado pelo Chart JS Geo
+			
+			var nomes = [];
+			var unidades = [];
+			
+			for ([codigo, geometria] of Object.entries(geometrias.objects)) {
+				
+				nomes.push(map[codigo].Nome);
+				
+				unidades.push({
+					feature: ChartGeo.topojson.feature(geometrias, geometrias.objects[codigo]).features[0],
+					value: map[codigo].Valor
+				});
+			
+			}
+			
+			// ...
+			
+			var titulo = $("#titulo").val();
+			var subtitulo = $("#subtitulo").val();
+			var faixas = $("#num-faixas").val();
+			var paleta = $("#paleta").val();
+			
+			var config = {
+				type: "choropleth",
+				data: {
+					labels: nomes,
+					datasets: [{
+						outline: ChartGeo.topojson.feature(brasil, brasil.objects.BRBR).features[0],
+						showOutline: true,
+						data: unidades
+					}]
+				},
+				options: {
+					plugins: {
+						title: {
+							display: true,
+							text: titulo,
+							padding: { bottom: 10 }
+						},
+						subtitle: {
+							display: (subtitulo.length > 0),
+							text: subtitulo,
+							padding: { bottom: 20 }
+						},
+						legend: {
+							display: false
+						},
+					},
+					scales: {
+						projection: {
+							axis: "x",
+							projection: "mercator"  
+						},
+						color: {
+							axis: "x",
+							quantize: faixas,
+							interpolate: paleta,
+							legend: {
+								position: "bottom-right",
+								align: "left"
+							},
+						}
+					},
+				}
+			};
+			
+			mostrarChart(config);
+			
+			plotBtn.html(plotBtnHtml);
+			plotBtn.prop("disabled", false).removeClass("disabled");
+			
+		});
+		
+	}
+	
+	function choroplethChartFormNivel() {
+		
+		var niveis = [];
+		
+		_metadados.NiveisTerritoriais.map((nivel, index) => {
+			
+			if (nivel.Id >= 2 && nivel.Id <= 3) {
+				
+				niveis.push(`
+					<option value="${nivel.Id}" ${index == 0 ? "selected" : ""}>
+						${nivel.Nome}
+					</option>
+					`);
+				
+			}
+				
+		});
+		
+		var html = `
+			<div class="row mb-2">
+				<label for="select-nivel" class="col-3 col-form-label">Nível</label>
+				<div class="col">
+					<select class="form-select" id="select-nivel">
+						${niveis.join("")}
+					</select>
+				</div>
+			</div>`;
+		
+		return html;
+		
+	}
+	
+	function choroplethChartFormPeriodo() {
+		
+		var periodos = _metadados.Periodos.map((periodo, index) => {
+			
+			return `
+				<option value="${periodo.Codigo}" ${index == 0 ? "selected" : ""}>
+					${periodo.Nome}
+				</option>`;
+				
+		});
+		
+		var html = `
+			<div class="row mb-2">
+				<label for="select-periodo" class="col-3 col-form-label">Período</label>
+				<div class="col">
+					<select class="form-select" id="select-periodo">
+						${periodos.join("")}
+					</select>
+				</div>
+			</div>`;
+		
+		return html;
+		
+	}
+	
+	function choroplethChartFormVariável() {
+		
+		var variaveis = _metadados.Variaveis.map((variavel, index) => {
+			
+			return `
+				<option value="${variavel.Id}" ${index == 0 ? "selected" : ""}>
+					${variavel.Nome}
+				</option>`;
+				
+		});
+		
+		var html = `
+			<div class="row mb-2">
+				<label for="select-variavel" class="col-3 col-form-label">Variável</label>
+				<div class="col">
+					<select class="form-select" id="select-variavel">
+						${variaveis.join("")}
+					</select>
+				</div>
+			</div>`;
+		
+		return html;
+		
+	}
+	
+	function choroplethChartFormDesagregacoes() {
+		
+		var html = "";
+		
+		_metadados.Classificacoes.forEach((classificacao) => {
+			
+			var categorias = classificacao.Categorias.map((categoria, index) => {
+				
+				return `
+					<option value="${categoria.Id}" ${index == 0 ? "selected" : ""}>
+						${categoria.Nome}
+					</option>`;
+				
+			});
+			
+			html += `
+				<div class="row mb-2">
+					<label 
+					for="select-cla-${classificacao.Id}" 
+					class="col-3 
+					col-form-label">
+						${classificacao.Nome}
+					</label>
+					<div class="col">
+						<select class="form-select" id="select-cla-${classificacao.Id}">
+							${categorias.join("")}
+						</select>
+					</div>
+				</div>
+				`;
+			
+		});
+		
+		return html;
+	
+	}
+	
+	function choroplethChartFormTitulos() {
+		
+		var html = `
+			<!-- TÍTULO DO GRÁFICO -->
+			<div class="row mb-2">
+				<label for="titulo" class="col-3 col-form-label">Título</label>
+				<div class="col">
+					<input type="text" class="form-control" id="titulo" value="${_metadados.Nome}">
+				</div>
+			</div>
+			<!-- SUBTÍTULO DO GRÁFICO -->
+			<div class="row mb-2">
+				<label for="subtitulo" class="col-3 col-form-label">Subtítulo</label>
+				<div class="col">
+					<input type="text" class="form-control" id="subtitulo" value="${_metadados.Variaveis[0].Nome} (${_metadados.Variaveis[0].UnidadeMedida})">
+				</div>
+			</div>
+			<!-- NÚMERO DE FAIXAS -->
+			<div class="row mb-2">
+				<label for="num-faixas" class="col-3 col-form-label">Número de faixas</label>
+				<div class="col">
+					<input type="text" class="form-control" id="num-faixas" value="5">
+				</div>
+			</div>
+			<!-- PALETA DE CORES -->
+			<div class="row mb-2">
+				<label for="paleta" class="col-3 col-form-label">Paleta de cores</label>
+				<div class="col">
+					<select class="form-select" id="paleta">
+						<option value="blues">Blues</option>
+						<option value="greens">Greens</option>
+						<option value="purples">Purples</option>
+						<option value="oranges">Oranges</option>
+						<option value="warm">Warm</option>
+						<option value="magma">Magma</option>
+						<option value="cividis">Cividis</option>
+					</select>
+				</div>
+			</div>
+		`;
+		
+		return html;
+	
+	}
+	
+	function choroplethChartFormEventSelectVariavel() {
+	
+		$(document).on("change", "#choropleth-chart-form #select-variavel", function() {
+			
+			var variavel = 
+				_metadados
+				.Variaveis
+				.find(x => x.Id == $(this).val());
+			
+			$("#choropleth-chart-form #subtitulo").val(variavel.Nome + " (" + variavel.UnidadeMedida + ")");
+			
+		});
+	
+	}
+	
+	function choroplethChartForm() {
+		
+		var nivel = choroplethChartFormNivel();
+		var periodo = choroplethChartFormPeriodo();
+		var variavel = choroplethChartFormVariável();
+		var desagregacoes = choroplethChartFormDesagregacoes();
+		var titulos = choroplethChartFormTitulos();
+		
+		var html = `
+			<div id="choropleth-chart-form">
+				${nivel}
+				${periodo}
+				${variavel}
+				${desagregacoes}
+				<div id="titulos">
+					${titulos}
+				</div>
+			</div>
+		`;
+		
+		$("#chart-form-content").html(html);
+		
+		choroplethChartFormEventSelectVariavel();
+		
+	}
+	
+	// ...
+	
+	function mostrarMetadados() {
+		
+		const metadados = _metadados;
+		
+		var variaveis = ``;
+		var classificacoes = ``;
+		var periodos = ``;
+		var niveis = ``;
+		
+		metadados.Variaveis.forEach((variavel) => {
+		
+			variaveis += `
+				<div class="row">
+					<div class="col">
+						${variavel.Id} - ${variavel.Nome}
+					</div>
+				</div>
+			`;
+		
+		});
+		
+		metadados.Classificacoes.forEach((classificacao) => {
+		
+			classificacoes += `
+				<div class="row">
+					<div class="col">
+						${classificacao.Id} - ${classificacao.Nome}
+					</div>
+				</div>
+			`;
+		
+		});
+		
+		periodos += `
+			<div class="row">
+				<div class="col">
+					${metadados.Periodos.map(x => x.Nome).join(', ')}
+				</div>
+			</div>
+		`;
+		
+		metadados.NiveisTerritoriais.forEach((nivel) => {
+		
+			niveis += `
+				<div class="row">
+					<div class="col">
+						${nivel.Id} - ${nivel.Nome}
+					</div>
+				</div>
+			`;
+		
+		});
+		
+		var html = `
+			<div class="row">
+				<div class="col-lg-2 col-sm-2">
+					<b>Código:</b>
+				</div>
+				<div class="col">
+					${metadados.Id}
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-2 col-sm-2">
+					<b>Nome:</b>
+				</div>
+				<div class="col">
+					${metadados.Nome}
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-2 col-sm-2">
+					<b>Variáveis:</b>
+				</div>
+				<div class="col">
+					${variaveis}
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-2 col-sm-2">
+					<b>Classificações:</b>
+				</div>
+				<div class="col">
+					${classificacoes.length == 0 ? "-" : classificacoes}
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-2 col-sm-2">
+					<b>Períodos:</b>
+				</div>
+				<div class="col">
+					${periodos}
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-2 col-sm-2">
+					<b>Níveis:</b>
+				</div>
+				<div class="col">
+					${niveis}
+				</div>
+			</div>
+		`;
+		
+		$("#metadados-container").css("display", "block");
+		$("#metadados-content").html(html);
+		
+	}
+	
+	function mostrarTipos() {
+		
+		var temGR = _metadados.NiveisTerritoriais.some(x => x.Id == 2);
+		var temUF = _metadados.NiveisTerritoriais.some(x => x.Id == 3);
+		
+		var html = ``;
+		
+		html += `<option value="line">Linha</option>`;
+		html += `<option value="bar">Barra</option>`;
+		
+		if (temGR == true || temUF == true) {
+		
+			html += `<option value="choropleth">Mapa coroplético</option>`;
+		
+		}
+		
+		$("#select-tipo").html(html);
+		
+	}
+	
+	function mostrarChartForm() {
+		
+		const tipo = $("#select-tipo").val();
+		
+		$("#chart-form-content").html("");
+		
+		if (tipo == "line") {
+				
+			lineChartForm();
+			
+		} else if (tipo == "bar") {
+			
+			barChartForm();
+			
+		} else if (tipo == "choropleth") {
+			
+			choroplethChartForm();
+			
+		}
+		
+		$("#chart-form-container").css("display", "block");
+		
+	}
+	
+	function mostrarChart(config) {
+		
+		if (_chart != null) { 
+			
+			_chart.destroy(); 
+			
+		}
+			
+		_chart = new Chart($("#chart"), config);
+		
+	}
+	
+	// ...
+	
+	function setup() {
+		
+		$("#input-agregado").val("");
+		//$("#input-agregado").val("10443");
+		//$("#input-agregado").val("5817");
+		$("#input-agregado").val("1612");
+		
+		$("#metadados-container").css("display", "none");
+		$("#chart-form-container").css("display", "none");
+		//$("#chart-container").css("display", "none");
+		
+		
+		
+		
+		const {
+			ChoroplethController,
+			GeoFeature,
+			ColorScale,
+			ProjectionScale
+		} = ChartGeo;
+		
+		Chart.register(
+			ChoroplethController,
+			GeoFeature,
+			ColorScale,
+			ProjectionScale
+		);
+		
+		
+		
+	}
+	
+	function setupBtnLoad() {
+		
+		$("#btn-load").click(function() {
+			
+			const inputAgregado = $("#input-agregado");
+			const loadBtn = $("#btn-load");
+			const loadBtnHtml = loadBtn.html();
+			
+			const codigo = inputAgregado.val();
+			const url = `https://apisidra.ibge.gov.br/DescritoresTabela/t/${codigo}`;
+			
+			inputAgregado.val("");
+			
+			loadBtn.html(`<div class="loader"></div>`);
+			loadBtn.prop("disabled", true).addClass("disabled");
+			
+			$.ajax({
+				url: url,
+				method: "GET",
+				dataType: "json",
+				success: function (metadados) {
+					
+					console.log(metadados);
+					
+					_metadados = metadados;
+					
+					agregarUnidades();
+					
+					mostrarMetadados();
+					mostrarTipos();
+					mostrarChartForm();
+					
+				},
+				complete: async function() {
+					
+					loadBtn.html(loadBtnHtml);
+					loadBtn.prop("disabled", false).removeClass("disabled");
+					
+				}
+			});
+			
+		});
+	
+	}
+	
+	function setupBtnPlot() {
+		
+		$("#btn-plot").click(function() {
+			
+			var tipo = $("#select-tipo").val();
+			
+			if (tipo == "line") {
+				
+				lineChartPlot();
+				
+			} else if (tipo == "bar") {
+				
+				barChartPlot();
+				
+			} else if (tipo == "choropleth") {
+				
+				choroplethChartPlot();
+				
+			}
+			
+		});
+	
+	}
+	
+	function setupSelectTipo() {
+		
+		$(document).on("change", "#select-tipo", function() {
+			
+			mostrarChartForm();
+			
+		});
+	
+	}
+	
+	function setupModalToggles() {
+		
+		$(document).on("click", "#modal-toggles #btn-all", function() {
+			
+			const param = $("#modal-toggles").data("param");
+			const paramId = $("#modal-toggles").data("param-id");
+			
+			if (param == "p") {
+				
+				_metadados
+				.Periodos
+				.forEach(x => { x.TmpMostrar = true; });
+				
+			} else if (param == "c") {
+				
+				_metadados
+				.Classificacoes
+				.find(x => x.Id == paramId)
+				.Categorias
+				.forEach(x => { x.TmpMostrar = true; });
+				
+			} else if (param == "n") {
+			
+				_metadados
+				.NiveisTerritoriais
+				.find(x => x.Id == paramId)
+				.Unidades
+				.forEach(x => { x.TmpMostrar = true; });
+				
+			}
+			
+			$("#modal-toggles .form-check-input").prop("checked", true);
+			
+		});
+		
+		$(document).on("click", "#modal-toggles #btn-none", function() {
+			
+			const param = $("#modal-toggles").data("param");
+			const paramId = $("#modal-toggles").data("param-id");
+			
+			if (param == "p") {
+				
+				_metadados
+				.Periodos
+				.forEach(x => { x.TmpMostrar = false; });
+				
+			} else if (param == "c") {
+				
+				_metadados
+				.Classificacoes
+				.find(x => x.Id == paramId)
+				.Categorias
+				.forEach(x => { x.TmpMostrar = false; });
+				
+			} else if (param == "n") {
+			
+				_metadados
+				.NiveisTerritoriais
+				.find(x => x.Id == paramId)
+				.Unidades
+				.forEach(x => { x.TmpMostrar = false; });
+				
+			}
+		
+			$("#modal-toggles .form-check-input").prop("checked", false);
+			
+		});
+		
+		$(document).on("change", "#modal-toggles .form-check-input", function() {
+			
+			const param = $("#modal-toggles").data("param");
+			const paramId = $("#modal-toggles").data("param-id");
+			
+			const id = $(this).data("id");
+			const mostrar = $(this).prop("checked");
+			
+			if (param == "p") {
+				
+				_metadados
+				.Periodos
+				.find(x => x.Codigo == id)
+				.TmpMostrar = mostrar;
+				
+			} else if (param == "c") {
+				
+				_metadados
+				.Classificacoes
+				.find(x => x.Id == paramId)
+				.Categorias
+				.find(x => x.Id == id)
+				.TmpMostrar = mostrar;
+				
+			} else if (param == "n") {
+			
+				_metadados
+				.NiveisTerritoriais
+				.find(x => x.Id == paramId)
+				.Unidades
+				.find(x => x.Codigo == id)
+				.TmpMostrar = mostrar;
+				
+			}
+			
+		});
+		
+		$(document).on("click", "#modal-toggles-btn-save", function() {
+			
+			const formId = $("#modal-toggles").data("form");
+			const param = $("#modal-toggles").data("param");
+			const paramId = $("#modal-toggles").data("param-id");
+			
+			if (param == "p") {
+				
+				var qnt = 
+					_metadados
+					.Periodos
+					.filter(x => x.TmpMostrar ?? true)
+					.length;
+				
+				if (qnt == 0) {
+				
+					$("#modal-toggles-span-error").html("Erro: Selecione pelo menos um item!");
+					
+					return;
+				
+				}
+				
+				_metadados
+				.Periodos
+				.forEach(x => { x.Mostrar = x.TmpMostrar; });
+				
+				var periodos = 
+					_metadados
+					.Periodos
+					.filter(x => x.Mostrar ?? true)
+					.map((x) => x.Nome);
+				
+				var subtexto = truncar(periodos.join(", "), 35);
+				
+				$(`#${formId} #subtexto-eixo-x`).html(subtexto);
+				
+			} else if (param == "c") {
+			
+				var qnt = 
+					_metadados
+					.Classificacoes
+					.find(x => x.Id == paramId)
+					.Categorias
+					.filter(x => x.TmpMostrar ?? true)
+					.length;
+				
+				if (qnt == 0) {
+				
+					$("#modal-toggles-span-error").html("Erro: Selecione pelo menos um item!");
+					
+					return;
+				
+				}
+				
+				_metadados
+				.Classificacoes
+				.find(x => x.Id == paramId)
+				.Categorias
+				.forEach(x => { x.Mostrar = x.TmpMostrar; });
+				
+				var categorias = 
+					_metadados
+					.Classificacoes
+					.find(x => x.Id == paramId)
+					.Categorias
+					.filter(x => x.Mostrar ?? true)
+					.map(x => x.Nome);
+					
+				var subtexto = truncar(categorias.join(", "), 35);
+				
+				$(`#${formId} #subtexto-c-${paramId}`).html(subtexto);
+				
+			} else if (param == "n") {
+			
+				var qnt = 
+					_metadados
+					.NiveisTerritoriais
+					.find(x => x.Id == paramId)
+					.Unidades
+					.filter(x => x.TmpMostrar ?? true)
+					.length;
+				
+				if (qnt == 0) {
+				
+					$("#modal-toggles-span-error").html("Erro: Selecione pelo menos um item!");
+					
+					return;
+				
+				}
+				
+				_metadados
+				.NiveisTerritoriais
+				.find(x => x.Id == paramId)
+				.Unidades
+				.forEach(x => { x.Mostrar = x.TmpMostrar; });
+				
+				var unidades = 
+					_metadados
+					.NiveisTerritoriais
+					.find(x => x.Id == paramId)
+					.Unidades
+					.filter(x => x.Mostrar ?? true)
+					.map(x => x.Nome);
+					
+				var subtexto = truncar(unidades.join(", "), 35);
+				
+				$(`#${formId} #subtexto-nivel-territorial`).html(subtexto);
+				
+			}
+			
+			$("#modal-toggles").modal("hide");
+			
+		});
+	
+		$("#modal-toggles").on("hide.bs.modal", function() {
+			
+			$("#modal-toggles-span-error").html("");
+			
+		});
+		
+	}
+	
+	// ...
+	
+	function aplicarTema(tema) {
+	
+		document.documentElement.setAttribute("data-bs-theme", tema);
+		localStorage.setItem("tema", tema);
+
+		const escuro = tema === "dark";
+		$("#theme-toggle i")
+		.toggleClass("bi-moon-stars-fill", !escuro)
+		.toggleClass("bi-sun-fill", escuro);
+		
+		$("#theme-toggle")
+		.attr("aria-label", escuro ? "Ativar modo claro" : "Ativar modo escuro");
+
+		if (_chart) {
+	
+			const cor = getComputedStyle(document.documentElement)
+			.getPropertyValue("--bs-body-color").trim();
+			_chart.options.color = cor;
+			_chart.update();
+		}
+		
+	}
+
+	$(function () {
+	
+		aplicarTema(localStorage.getItem("tema") || "light");
+
+		$("#theme-toggle").on("click", function () {
+	
+			const temaAtual = document.documentElement.getAttribute("data-bs-theme");
+			aplicarTema(temaAtual === "dark" ? "light" : "dark");
+		});
+		
+	});
+	
+	// ...
+	
+	$(document).ready(function () {
+		
+		setup();
+		
+		setupBtnLoad();
+		setupBtnPlot();
+		setupSelectTipo();
+		setupModalToggles();
+		
+	});
+
+</script>
+
+
+
