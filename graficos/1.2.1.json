@@ -1,0 +1,779 @@
+[
+  {
+    "agregado": 5845,
+    "periodos": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+    ],
+    "variavel": 9948,
+    "nivelTerritorial": 1,
+    "unidadesTerritoriais": [
+      1
+    ],
+    "classificacoes": [
+      {
+        "id": 86,
+        "categorias": [
+          95251,
+          2776,
+          119525
+        ]
+      }
+    ],
+    "series": [
+      [
+        {
+          "id": 95251,
+          "nome": "Total"
+        },
+        {
+          "id": 1,
+          "nome": "Brasil"
+        }
+      ],
+      [
+        {
+          "id": 2776,
+          "nome": "Branca"
+        },
+        {
+          "id": 1,
+          "nome": "Brasil"
+        }
+      ],
+      [
+        {
+          "id": 119525,
+          "nome": "Preta ou parda"
+        },
+        {
+          "id": 1,
+          "nome": "Brasil"
+        }
+      ]
+    ],
+    "titulos": [
+      "Total",
+      "Branca",
+      "Preta ou parda"
+    ],
+    "config": {
+      "type": "line",
+      "data": {
+        "labels": null,
+        "datasets": null
+      },
+      "options": {
+        "responsive": true,
+        "plugins": {
+          "legend": {
+            "position": "top"
+          },
+          "title": {
+            "display": true,
+            "text": "Indicador 1.2.1 - Proporção da população vivendo abaixo da linha de pobreza nacional, por cor ou raça"
+          }
+        },
+        "scales": {
+          "x": {
+            "title": {
+              "display": true,
+              "text": "Ano"
+            }
+          },
+          "y": {
+            "beginAtZero": true,
+            "title": {
+              "display": true,
+              "text": "Proporção (%)"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "agregado": 1612,
+    "periodos": [
+        1990,
+        1991,
+        1992,
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+    ],
+    "variavel": 109,
+    "nivelTerritorial": 1,
+    "unidadesTerritoriais": [
+        1
+    ],
+    "classificacoes": [
+        {
+            "id": 81,
+            "categorias": [
+                2711,
+                2713
+            ]
+        }
+    ],
+    "series": [
+        [
+            {
+                "id": 2711,
+                "nome": "Milho (em grão)"
+            },
+            {
+                "id": 1,
+                "nome": "Brasil"
+            }
+        ],
+        [
+            {
+                "id": 2713,
+                "nome": "Soja (em grão)"
+            },
+            {
+                "id": 1,
+                "nome": "Brasil"
+            }
+        ]
+    ],
+    "titulos": [
+        "Milho (em grão), Brasil",
+        "Soja (em grão), Brasil"
+    ],
+    "config": {
+        "type": "line",
+        "data": {
+            "labels": [
+                "1990",
+                "1991",
+                "1992",
+                "1993",
+                "1994",
+                "1995",
+                "1996",
+                "1997",
+                "1998",
+                "1999",
+                "2000",
+                "2001",
+                "2002",
+                "2003",
+                "2004",
+                "2005",
+                "2006",
+                "2007",
+                "2008",
+                "2009",
+                "2010",
+                "2011",
+                "2012",
+                "2013",
+                "2014",
+                "2015",
+                "2016",
+                "2017",
+                "2018",
+                "2019",
+                "2020",
+                "2021",
+                "2022",
+                "2023",
+                "2024",
+                "2025"
+            ],
+            "datasets": [
+                {
+                    "label": "Milho (em grão), Brasil",
+                    "data": [
+                        12023771,
+                        13580647,
+                        13886814,
+                        12876384,
+                        14522806,
+                        14182486,
+                        12505585,
+                        12825504,
+                        11234423,
+                        12418490,
+                        12648005,
+                        12912390,
+                        12304986,
+                        13343992,
+                        12864838,
+                        12249101,
+                        12997372,
+                        14010838,
+                        14747249,
+                        14144321,
+                        12963080,
+                        13605369,
+                        15065288,
+                        15711617,
+                        15843121,
+                        15848557,
+                        16051087,
+                        17739683,
+                        16548228,
+                        17774535,
+                        18356420,
+                        19547959,
+                        21310449,
+                        22546782,
+                        21401237,
+                        22503020
+                    ],
+                    "borderColor": "rgb(54, 162, 235)",
+                    "backgroundColor": "rgba(54, 162, 235, 0.5)"
+                },
+                {
+                    "label": "Soja (em grão), Brasil",
+                    "data": [
+                        11584734,
+                        9667625,
+                        9463625,
+                        10654163,
+                        11544577,
+                        11702919,
+                        10356156,
+                        11508120,
+                        13319749,
+                        13069793,
+                        13693677,
+                        13988351,
+                        16376035,
+                        18527544,
+                        21601340,
+                        23426756,
+                        22082666,
+                        20571393,
+                        21252721,
+                        21761782,
+                        23339094,
+                        24032410,
+                        25090559,
+                        27948605,
+                        30308231,
+                        32206387,
+                        33339305,
+                        34004361,
+                        34838351,
+                        35944094,
+                        37204962,
+                        39048835,
+                        41297663,
+                        44423983,
+                        46208798,
+                        47636956
+                    ],
+                    "borderColor": "rgb(255, 99, 132)",
+                    "backgroundColor": "rgba(255, 99, 132, 0.5)"
+                }
+            ]
+        },
+        "options": {
+			"devicePixelRatio": 3,
+            "responsive": true,
+            "plugins": {
+                "legend": {
+                    "position": "top"
+                },
+                "title": {
+                    "display": true,
+                    "text": "Área plantada, área colhida, quantidade produzida, rendimento médio e valor da produção das lavouras temporárias"
+                }
+            },
+            "scales": {
+                "x": {
+                    "axis": "x",
+                    "title": {
+                        "display": true,
+                        "text": "Ano",
+                        "padding": {
+                            "top": 4,
+                            "bottom": 4
+                        },
+                        "color": "#666"
+                    },
+                    "type": "category",
+                    "ticks": {
+                        "minRotation": 0,
+                        "maxRotation": 50,
+                        "mirror": false,
+                        "textStrokeWidth": 0,
+                        "textStrokeColor": "",
+                        "padding": 3,
+                        "display": true,
+                        "autoSkip": true,
+                        "autoSkipPadding": 3,
+                        "labelOffset": 0,
+                        "minor": {},
+                        "major": {},
+                        "align": "center",
+                        "crossAlign": "near",
+                        "showLabelBackdrop": false,
+                        "backdropColor": "rgba(255, 255, 255, 0.75)",
+                        "backdropPadding": 2,
+                        "color": "#666"
+                    },
+                    "display": true,
+                    "offset": false,
+                    "reverse": false,
+                    "beginAtZero": false,
+                    "bounds": "ticks",
+                    "clip": true,
+                    "grace": 0,
+                    "grid": {
+                        "display": true,
+                        "lineWidth": 1,
+                        "drawOnChartArea": true,
+                        "drawTicks": true,
+                        "tickLength": 8,
+                        "offset": false,
+                        "color": "rgba(0,0,0,0.1)"
+                    },
+                    "border": {
+                        "display": true,
+                        "dash": [],
+                        "dashOffset": 0,
+                        "width": 1,
+                        "color": "rgba(0,0,0,0.1)"
+                    },
+                    "id": "x",
+                    "position": "bottom"
+                },
+                "y": {
+                    "axis": "y",
+                    "beginAtZero": true,
+                    "title": {
+                        "display": true,
+                        "text": "Área plantada",
+                        "padding": {
+                            "top": 4,
+                            "bottom": 4
+                        },
+                        "color": "#666"
+                    },
+                    "type": "linear",
+                    "ticks": {
+                        "minRotation": 0,
+                        "maxRotation": 50,
+                        "mirror": false,
+                        "textStrokeWidth": 0,
+                        "textStrokeColor": "",
+                        "padding": 3,
+                        "display": true,
+                        "autoSkip": true,
+                        "autoSkipPadding": 3,
+                        "labelOffset": 0,
+                        "minor": {},
+                        "major": {},
+                        "align": "center",
+                        "crossAlign": "near",
+                        "showLabelBackdrop": false,
+                        "backdropColor": "rgba(255, 255, 255, 0.75)",
+                        "backdropPadding": 2,
+                        "color": "#666"
+                    },
+                    "display": true,
+                    "offset": false,
+                    "reverse": false,
+                    "bounds": "ticks",
+                    "clip": true,
+                    "grace": 0,
+                    "grid": {
+                        "display": true,
+                        "lineWidth": 1,
+                        "drawOnChartArea": true,
+                        "drawTicks": true,
+                        "tickLength": 8,
+                        "offset": false,
+                        "color": "rgba(0,0,0,0.1)"
+                    },
+                    "border": {
+                        "display": true,
+                        "dash": [],
+                        "dashOffset": 0,
+                        "width": 1,
+                        "color": "rgba(0,0,0,0.1)"
+                    },
+                    "id": "y",
+                    "position": "left"
+                }
+            }
+        }
+    }
+},
+{
+    "agregado": 5817,
+    "periodos": [
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+    ],
+    "variavel": 9617,
+    "nivelTerritorial": 2,
+    "unidadesTerritoriais": [
+        1,
+        2,
+        3,
+        4,
+        5
+    ],
+    "classificacoes": [],
+    "series": [
+        [
+            {
+                "id": 1,
+                "nome": "Norte"
+            }
+        ],
+        [
+            {
+                "id": 2,
+                "nome": "Nordeste"
+            }
+        ],
+        [
+            {
+                "id": 3,
+                "nome": "Sudeste"
+            }
+        ],
+        [
+            {
+                "id": 4,
+                "nome": "Sul"
+            }
+        ],
+        [
+            {
+                "id": 5,
+                "nome": "Centro-Oeste"
+            }
+        ]
+    ],
+    "titulos": [
+        "Norte",
+        "Nordeste",
+        "Sudeste",
+        "Sul",
+        "Centro-Oeste"
+    ],
+    "config": {
+        "type": "line",
+        "data": {
+            "labels": [
+                "2012",
+                "2013",
+                "2014",
+                "2015",
+                "2016",
+                "2017",
+                "2018",
+                "2019",
+                "2020",
+                "2021",
+                "2022",
+                "2023",
+                "2024"
+            ],
+            "datasets": [
+                {
+                    "label": "Norte",
+                    "data": [
+                        15.9,
+                        14.4,
+                        13,
+                        14.8,
+                        16.6,
+                        15.9,
+                        16.2,
+                        17.2,
+                        11.9,
+                        18.5,
+                        11.8,
+                        8.6,
+                        6.9
+                    ],
+                    "borderColor": "rgb(54, 162, 235)",
+                    "backgroundColor": "rgba(54, 162, 235, 0.5)"
+                },
+                {
+                    "label": "Nordeste",
+                    "data": [
+                        18.5,
+                        16.9,
+                        14.5,
+                        15.7,
+                        18,
+                        19,
+                        19.1,
+                        18.9,
+                        14.4,
+                        21.7,
+                        15.1,
+                        12.1,
+                        9.1
+                    ],
+                    "borderColor": "rgb(255, 99, 132)",
+                    "backgroundColor": "rgba(255, 99, 132, 0.5)"
+                },
+                {
+                    "label": "Sudeste",
+                    "data": [
+                        4.1,
+                        3.6,
+                        3.4,
+                        3.4,
+                        4.6,
+                        4.6,
+                        4.7,
+                        4.5,
+                        5,
+                        6.6,
+                        4.3,
+                        3.1,
+                        2.9
+                    ],
+                    "borderColor": "rgb(255, 159, 64)",
+                    "backgroundColor": "rgba(255, 159, 64, 0.5)"
+                },
+                {
+                    "label": "Sul",
+                    "data": [
+                        2.8,
+                        2.2,
+                        2.2,
+                        2.4,
+                        3,
+                        3.1,
+                        3.3,
+                        3,
+                        3.7,
+                        3.9,
+                        3.1,
+                        2.1,
+                        1.9
+                    ],
+                    "borderColor": "rgb(255, 205, 86)",
+                    "backgroundColor": "rgba(255, 205, 86, 0.5)"
+                },
+                {
+                    "label": "Centro-Oeste",
+                    "data": [
+                        3.4,
+                        3,
+                        2.9,
+                        3.4,
+                        3.9,
+                        4.3,
+                        4,
+                        3.9,
+                        3.9,
+                        5.1,
+                        3.5,
+                        2.4,
+                        2.2
+                    ],
+                    "borderColor": "rgb(75, 192, 192)",
+                    "backgroundColor": "rgba(75, 192, 192, 0.5)"
+                }
+            ]
+        },
+        "options": {
+            "responsive": true,
+            "plugins": {
+                "legend": {
+                    "position": "top"
+                },
+                "title": {
+                    "display": true,
+                    "text": "Indicador 1.1.1 - Proporção da população abaixo da linha de pobreza internacional"
+                },
+                "subtitle": {
+                    "display": true,
+                    "text": "Fonte: IBGE, Objetivos de Desenvolvimento Sustentável, SIDRA, Tabela 5817.",
+                    "position": "bottom",
+                    "padding": {
+                        "top": 8
+                    }
+                }
+            },
+            "scales": {
+                "x": {
+                    "axis": "x",
+                    "title": {
+                        "display": true,
+                        "text": "Ano",
+                        "padding": {
+                            "top": 4,
+                            "bottom": 4
+                        },
+                        "color": "#666"
+                    },
+                    "type": "category",
+                    "ticks": {
+                        "minRotation": 0,
+                        "maxRotation": 50,
+                        "mirror": false,
+                        "textStrokeWidth": 0,
+                        "textStrokeColor": "",
+                        "padding": 3,
+                        "display": true,
+                        "autoSkip": true,
+                        "autoSkipPadding": 3,
+                        "labelOffset": 0,
+                        "minor": {},
+                        "major": {},
+                        "align": "center",
+                        "crossAlign": "near",
+                        "showLabelBackdrop": false,
+                        "backdropColor": "rgba(255, 255, 255, 0.75)",
+                        "backdropPadding": 2,
+                        "color": "#666"
+                    },
+                    "display": true,
+                    "offset": false,
+                    "reverse": false,
+                    "beginAtZero": false,
+                    "bounds": "ticks",
+                    "clip": true,
+                    "grace": 0,
+                    "grid": {
+                        "display": true,
+                        "lineWidth": 1,
+                        "drawOnChartArea": true,
+                        "drawTicks": true,
+                        "tickLength": 8,
+                        "offset": false,
+                        "color": "rgba(0,0,0,0.1)"
+                    },
+                    "border": {
+                        "display": true,
+                        "dash": [],
+                        "dashOffset": 0,
+                        "width": 1,
+                        "color": "rgba(0,0,0,0.1)"
+                    },
+                    "id": "x",
+                    "position": "bottom"
+                },
+                "y": {
+                    "axis": "y",
+                    "beginAtZero": true,
+                    "title": {
+                        "display": true,
+                        "text": "Proporção (%)",
+                        "padding": {
+                            "top": 4,
+                            "bottom": 4
+                        },
+                        "color": "#666"
+                    },
+                    "type": "linear",
+                    "ticks": {
+                        "minRotation": 0,
+                        "maxRotation": 50,
+                        "mirror": false,
+                        "textStrokeWidth": 0,
+                        "textStrokeColor": "",
+                        "padding": 3,
+                        "display": true,
+                        "autoSkip": true,
+                        "autoSkipPadding": 3,
+                        "labelOffset": 0,
+                        "minor": {},
+                        "major": {},
+                        "align": "center",
+                        "crossAlign": "near",
+                        "showLabelBackdrop": false,
+                        "backdropColor": "rgba(255, 255, 255, 0.75)",
+                        "backdropPadding": 2,
+                        "color": "#666"
+                    },
+                    "display": true,
+                    "offset": false,
+                    "reverse": false,
+                    "bounds": "ticks",
+                    "clip": true,
+                    "grace": 0,
+                    "grid": {
+                        "display": true,
+                        "lineWidth": 1,
+                        "drawOnChartArea": true,
+                        "drawTicks": true,
+                        "tickLength": 8,
+                        "offset": false,
+                        "color": "rgba(0,0,0,0.1)"
+                    },
+                    "border": {
+                        "display": true,
+                        "dash": [],
+                        "dashOffset": 0,
+                        "width": 1,
+                        "color": "rgba(0,0,0,0.1)"
+                    },
+                    "id": "y",
+                    "position": "left"
+                }
+            },
+            "devicePixelRatio": 3
+        }
+    },
+    "pos": 0,
+    "idx": 0
+}
+]
